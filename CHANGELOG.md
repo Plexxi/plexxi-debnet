@@ -1,8 +1,12 @@
+## 2016-09-28 - Release 1.6.0-plexxi.1
+
+##Summary
+- project fork and customizations for Plexxi
+
 ## 2016-03-04 - Release 1.6.0
 
 ##Summary
 - feature added to create /etc/interfaces.d/ configurations
-
 
 ## 2016-01-07 - Release 1.5.2
 

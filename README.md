@@ -26,6 +26,9 @@
 
 ##Overview
 
+###PROJECT FORK
+This is a fork of the trepasi-debnet project at https://github.com/rtib/tib-debnet.
+
 This module constructs the ```/etc/network/interfaces``` file on Debian based 
 Linux distributions and enables an easy configuration of sophisticated
 network setups, such as bridges and bonding configurations.

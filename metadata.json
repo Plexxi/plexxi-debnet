@@ -1,8 +1,8 @@
 {
-  "name": "trepasi-debnet",
+  "name": "plexxi-debnet",
   "version": "2.0.0",
   "author": "T. Repasi",
-  "summary": "Puppet module to manage /etc/network/interface file on Debian based Linux systems.",
+  "summary": "Puppet module to manage /etc/network/interfaces.d/* files on Debian based Linux systems.",
   "tags": [
     "network",
     "interfaces",
@@ -12,9 +12,9 @@
     "bonding"
   ],
   "license": "Apache-2.0",
-  "project_page": "https://github.com/rtib/tib-debnet.git",
-  "source": "https://github.com/rtib/tib-debnet.git",
-  "issues_url": "https://github.com/rtib/tib-debnet/issues",
+  "project_page": "https://github.com/Plexxi/plexxi-debnet.git",
+  "source": "https://github.com/Plexxi/plexxi-debnet.git",
+  "issues_url": "https://github.com/Plexxi/plexxi-debnet/issues",
   "operatingsystem_support": [
     {
       "operatingsystem": "Debian",
