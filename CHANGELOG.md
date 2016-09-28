@@ -1,4 +1,4 @@
-## 2016-09-28 - Release 1.6.0-plexxi.1
+## 2016-09-28 - Release 2.0.1
 
 ##Summary
 - project fork and customizations for Plexxi

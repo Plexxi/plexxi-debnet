@@ -1,7 +1,7 @@
 {
   "name": "plexxi-debnet",
-  "version": "2.0.0",
-  "author": "T. Repasi",
+  "version": "2.0.1",
+  "author": "Plexxi Inc",
   "summary": "Puppet module to manage /etc/network/interfaces.d/* files on Debian based Linux systems.",
   "tags": [
     "network",
@@ -35,11 +35,11 @@
   "dependencies": [
     {
       "name": "puppetlabs/concat",
-      "version_requirement": ">= 2.0.0 < 3.0.0"
+      "version_requirement": ">= 1.1.1 < 3.0.0"
     },
     {
       "name": "puppetlabs/stdlib",
-      "version_requirement": ">= 4.12.0 < 5.0.0"
+      "version_requirement": ">= 4.3.2 < 5.0.0"
     }
   ],
   "requirements": [
