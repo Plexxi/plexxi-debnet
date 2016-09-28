@@ -130,7 +130,7 @@ define debnet::iface (
   $allows = [],
   $family = 'inet',
   $order = 0,
-  $iface_d = undef,
+  $iface_d = $title,
 
   # options for multiple methods
   $metric = undef,
@@ -183,7 +183,7 @@ define debnet::iface (
       validate_re($tx_queue, '^\d+$')
     }
     else {
-      validate_integer($tx_queue)
+      validate_re($tx_queue, '^\d+$')
     }
   }
   if $routes {
@@ -196,9 +196,24 @@ define debnet::iface (
     validate_array($dns_search)
   }
 
+  if $hwaddress {
+    $cfg_hwaddress = $hwaddress
+  }
+  else {
+    if $ifname == 'mgmt' {
+      # Read hwaddr from platinfo.json
+      $jsondata = parsejson(file("/etc/platinfo.json"))
+      if $jsondata {
+        $cfg_hwaddress = $jsondata['MgmtMac']
+      }
+      else { $cfg_hwaddress = undef }
+    }
+    else { $cfg_hwaddress = undef }
+  }
+
   if $iface_d {
-    if $::facts['lsbdistid'] == 'Debian' and
-      $::facts['lsbmajdistrelease'] =~ /!^8.*/ {
+    if $lsbdistid == 'Debian' and
+      $lsbmajdistrelease =~ /!^8.*/ {
       fail('This feature is not available prior to Debian release 8.')
     }
     validate_re($iface_d, '^[a-zA-Z][a-zA-Z0-9_]*$')
@@ -244,8 +259,9 @@ define debnet::iface (
       if $leasetime { validate_re($leasetime, '^\d+$') }
       if $vendor { validate_string($vendor) }
       if $client { validate_string($client) }
-      if $hwaddress {
-        validate_re($hwaddress, '^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$') }
+      if $cfg_hwaddress {
+        validate_re($cfg_hwaddress, '^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$')
+      }
 
       concat::fragment { "${ifname}_stanza":
         target  => $cfgtgt,
@@ -264,7 +280,7 @@ define debnet::iface (
         validate_re($netmask, '^([0-9]{1,3}\.){3}[0-9]{1,3}$|^[0-9]{1,2}$')
       }
       else {
-        validate_integer($netmask)
+        validate_re($netmask, '^\d+$')
       }
       if $broadcast {
         validate_re($broadcast, '^([0-9]{1,3}\.){3}[0-9]{1,3}$|^[+-]$')
@@ -274,8 +290,8 @@ define debnet::iface (
       if $pointopoint {
         validate_re($pointopoint, '(:?[0-9]{1,3}\.){3}[0-9]{1,3}$')
       }
-      if $hwaddress {
-        validate_re($hwaddress, '^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$')
+      if $cfg_hwaddress {
+        validate_re($cfg_hwaddress, '^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$')
       }
       if $mtu { validate_re($mtu, '^\d+$') }
       if $scope { validate_re($scope, '^global$|^link$|^host$') }

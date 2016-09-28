@@ -13,8 +13,8 @@ iface <%= @ifname -%> inet static
 <% if @pointopoint -%>
   pointopoint <%= @pointopoint %>
 <% end -%>
-<% if @hwaddress -%>
-  hwaddress <%= @hwaddress %>
+<% if @cfg_hwaddress -%>
+  hwaddress <%= @cfg_hwaddress %>
 <% end -%>
 <% if @mtu -%>
   mtu <%= @mtu %>

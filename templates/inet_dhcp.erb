@@ -14,6 +14,6 @@ iface <%= @ifname -%> <%= @family -%> dhcp
 <% if @client -%>
   client "<%= @client -%>"
 <% end -%>
-<% if @hwaddress -%>
-  hwaddress "<%= @hwaddress -%>"
+<% if @cfg_hwaddress -%>
+  hwaddress <%= @cfg_hwaddress -%>
 <% end -%>
