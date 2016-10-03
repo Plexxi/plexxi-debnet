@@ -1,0 +1,4 @@
+manifests usr/share/puppet/modules.available/plexxi-debnet
+metadata.json usr/share/puppet/modules.available/plexxi-debnet
+spec usr/share/puppet/modules.available/plexxi-debnet
+templates usr/share/puppet/modules.available/plexxi-debnet

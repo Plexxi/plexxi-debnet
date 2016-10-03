@@ -1,0 +1,5 @@
+puppet-module-plexxi-debnet (2.0.1-plexxi.1) unstable; urgency=low
+
+  * Initial packaging for Plexxi
+
+ -- Joe Lorenz <joe.lorenz@plexxi.com>  Wed, 28 Sep 2016 17:32:25 -0400
