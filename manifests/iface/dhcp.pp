@@ -99,8 +99,8 @@
 #
 define debnet::iface::dhcp (
   $ifname = $title,
-  $auto = true,
-  $allows = [],
+  $auto = false,
+  $allows = [hotplug],
   $family = 'inet',
   $order = 0,
   $iface_d = undef,
