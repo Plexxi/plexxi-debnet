@@ -172,7 +172,7 @@ define debnet::iface (
   validate_bool($auto)
   validate_array($allows)
   validate_re($family, '^inet$' )
-  validate_re($method, '^loopback$|^dhcp$|^static$|^manual$|^wvdial$')
+  validate_re($method, '^loopback$|^dhcp$|^static$|^manual$|^wvdial$|^disable$')
   validate_hash($aux_ops)
   validate_array($pre_ups)
   validate_array($ups)
@@ -223,32 +223,8 @@ define debnet::iface (
   }
   validate_absolute_path($cfgtgt)
 
-  if !defined(Concat[$cfgtgt])
-  {
-    concat { $cfgtgt:
-      owner          => 'root',
-      group          => 'root',
-      mode           => '0644',
-      ensure_newline => true,
-      order          => 'numeric',
-    }
-
-    concat::fragment { "${cfgtgt}_header":
-      target  => $cfgtgt,
-      content => template('debnet/header.erb'),
-      order   => 10,
-    }
-  }
-
+  # Further validations by method
   case $method {
-    'loopback' : {
-      concat::fragment { 'lo_stanza':
-        target  => $cfgtgt,
-        content => template('debnet/loopback.erb'),
-        order   => 20 + $order,
-      }
-    }
-
     'dhcp' : {
       if !defined(Package[$debnet::params::dhclient_pkg]) {
         package { $debnet::params::dhclient_pkg: ensure => 'installed', }
@@ -261,16 +237,6 @@ define debnet::iface (
       if $client { validate_string($client) }
       if $cfg_hwaddress {
         validate_re($cfg_hwaddress, '^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$')
-      }
-
-      concat::fragment { "${ifname}_stanza":
-        target  => $cfgtgt,
-        content => template(
-          'debnet/iface_header.erb',
-          'debnet/inet_dhcp.erb',
-          'debnet/iface_aux.erb',
-          'debnet/iface_routes.erb'),
-        order   => 30 + $order,
       }
     }
 
@@ -295,9 +261,68 @@ define debnet::iface (
       }
       if $mtu { validate_re($mtu, '^\d+$') }
       if $scope { validate_re($scope, '^global$|^link$|^host$') }
+    }
 
+    'wvdial' : {
+      if !defined(Package[$debnet::params::wvdial_pkg]) {
+        package { $debnet::params::wvdial_pkg: ensure => 'installed', }
+      }
+    }
+  }
+
+  # Gen to temp file
+  $tmpgen = "/tmp/debnet_${ifname}.tmp"
+  if !defined(Concat[$tmpgen])
+  {
+    concat { $tmpgen:
+      owner          => 'root',
+      group          => 'root',
+      mode           => '0644',
+      ensure_newline => true,
+      order          => 'numeric',
+    }
+
+    concat::fragment { "${tmpgen}_header":
+      target  => $tmpgen,
+      content => template('debnet/header.erb'),
+      order   => 10,
+    }
+  }
+
+  case $method {
+    'disable' : {
+      concat::fragment { 'disable_stanza':
+        target  => $tmpgen,
+        content => template(
+          'debnet/iface_header.erb',
+          'debnet/iface_disable.erb'),
+        order   => 20 + $order,
+      }
+    }
+
+    'loopback' : {
+      concat::fragment { 'lo_stanza':
+        target  => $tmpgen,
+        content => template('debnet/loopback.erb'),
+        order   => 20 + $order,
+      }
+    }
+
+    'dhcp' : {
       concat::fragment { "${ifname}_stanza":
-        target  => $cfgtgt,
+        target  => $tmpgen,
+        content => template(
+          'debnet/iface_header.erb',
+          'debnet/inet_dhcp.erb',
+          'debnet/iface_aux.erb',
+          'debnet/iface_routes.erb'),
+        order   => 30 + $order,
+      }
+    }
+
+    'static' : {
+      concat::fragment { "${ifname}_stanza":
+        target  => $tmpgen,
         content => template(
           'debnet/iface_header.erb',
           'debnet/inet_static.erb',
@@ -309,7 +334,7 @@ define debnet::iface (
 
     'manual' : {
       concat::fragment { "${ifname}_stanza":
-        target  => $cfgtgt,
+        target  => $tmpgen,
         content => template(
           'debnet/iface_header.erb',
           'debnet/inet_misc.erb',
@@ -319,12 +344,8 @@ define debnet::iface (
     }
 
     'wvdial' : {
-      if !defined(Package[$debnet::params::wvdial_pkg]) {
-        package { $debnet::params::wvdial_pkg: ensure => 'installed', }
-      }
-
       concat::fragment { "${ifname}_stanza":
-        target  => $cfgtgt,
+        target  => $tmpgen,
         content => template(
           'debnet/iface_header.erb',
           'debnet/inet_misc.erb',
@@ -338,4 +359,14 @@ define debnet::iface (
       err('unrecognized method')
     }
   }
+
+  exec { "${ifname}-engage":
+    unless => "/usr/bin/cmp -s ${tmpgen} ${cfgtgt}",
+    command => "/sbin/ifdown ${ifname}; /bin/cp ${tmpgen} ${cfgtgt}",
+    require => Concat[$tmpgen],
+  } -> exec { "${ifname}-up":
+    unless => "/usr/bin/test ${method} = disable",
+    command => "/sbin/ifup ${ifname}",
+  }
 }
+

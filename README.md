@@ -73,6 +73,7 @@ are:
 * dhcp
 * manual
 * wvdial
+* disable
 
 ###Configuring the loopback interface
 Currently there is only a single way to create a configuration on the
@@ -124,6 +125,13 @@ Available attributes:
 * ```leasetime``` - (int) leasetime to request (optional)
 * ```vendor``` - (string) vendor id to send with request (optional)
 * ```client``` - (string) client id to send with request (optional)
+
+###Disabled configuration
+An interface can be set disabled.
+
+```puppet
+debnet::iface::disable { 'eth0': }
+```
 
 ###Common attributes
 Many resource types have some common attributes. These are:
