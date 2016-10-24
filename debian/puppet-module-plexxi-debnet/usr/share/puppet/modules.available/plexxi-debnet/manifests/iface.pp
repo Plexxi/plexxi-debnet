@@ -1,0 +1,372 @@
+# == Define: iface
+#
+# Resource to define an interface configuration stanza within interfaces(5).
+#
+# == Parameters
+#
+# [*ifname*] => *(namevar)* - string
+#   Name of the interface to be configured.
+#
+# [*method*] - string
+#   Configuration method to be used. Supported methods are:
+#   * loopback
+#   * dhcp
+#   * static
+#   * manual
+#   * wvdial
+#
+# [*auto*] - bool
+#   Sets the interface on automatic setup on startup. This is affected by
+#   ifup -a and ifdown -a commands.
+#
+# [*allows*] - array
+#   Adds an allow- entry to the interface stanza.
+#
+# [*family*] - string
+#   Address family. Currently, only inet family is supported. Support for
+#   inet6 is comming soon.
+#
+# [*order*] - int
+#   Order of the entry to be created in /etc/network/interfaces. Innate
+#   odering is preset with default value of 10 for loopback and 20 for dhcp
+#   and static stanzas. The order attribute of the resource is added to the
+#   default value.
+#
+# [*hwaddress*] - string
+#   The MAC address of the interface. This value is validated as standard
+#   IEEE MAC address of 6 bytes, written hexadecimal, delimited with
+#   colons (:) or dashes (-).
+#
+# [*hostname*] - string
+#   The hostname to be submitted with dhcp requests.
+#
+# [*leasetime*] - int
+#   The requested leasetime of dhcp leases.
+#
+# [*vendor*] - string
+#   The vendor id to be submitted with dhcp requests.
+#
+# [*client*] - string
+#  The client id to be submitted with dhcp requests.
+#
+# [*metric*] - int
+#  Routing metric for routes added resolved on this interface.
+#
+# [*address*] - string
+#  IP address formatted as dotted-quad for IPv4.
+#
+# [*netmask*] - string
+#  Netmask as dotted-quad or CIDR prefix length.
+#
+# [*broadcast*] - string
+#  Broadcast address as dotted-quad or + or -.
+#
+# [*gateway*] - string
+#  Default route to be brought up with this interface.
+#
+# [*pointopoint*] - stirng
+#  Address of the ppp endpoint as dotted-quad.
+#
+# [*mtu*] - int
+#  Size of the maximum transportable unit over this interface.
+#
+# [*scope*] - string
+#  Scope of address validity. Values allowed are global, link or host.
+#
+# [*pre_ups*] - array
+#  Array of commands to be run prior to bringing this interface up.
+#
+# [*ups*] - array
+#  Array of commands to be run after bringing this interface up.
+#
+# [*downs*] - array
+#  Array of commands to be run prior to bringing this interface down.
+#
+# [*post_downs*] - array
+#  Array of commands to be run after bringing this interface down.
+#
+# [*aux_ops*] - hash
+#  Hash of key-value pairs with auxiliary options for this interface.
+#  To be used by other debnet types only.
+#
+# [*tx_queue*] - int
+#  Feature helper for setting tx queue on the interface.
+#
+# [*routes*] - hash
+#  Feature helper for setting static routes via the interface.
+#
+# [*dns_nameserver*] - array
+#  Feature helper to add a list of nameservers to be configures via resolvconf
+#  while the interface is set up.
+#
+# [*dns_search*] - array
+#  Feature helper to add a list of domain names as dns search via resolvconf
+#  while the interface is set up.
+#
+# === Authors
+#
+# Tibor Repasi
+#
+# === Copyright
+#
+# Copyright 2016 Tibor Repasi
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+define debnet::iface (
+  $method,
+  $ifname = $title,
+  $auto = true,
+  $allows = [],
+  $family = 'inet',
+  $order = 0,
+  $iface_d = $title,
+
+  # options for multiple methods
+  $metric = undef,
+  $hwaddress = undef,
+
+  # options for method dhcp
+  $hostname = undef,
+  $leasetime = undef,
+  $vendor = undef,
+  $client = undef,
+
+  # options for method static
+  $address = undef,
+  $netmask = undef,
+  $broadcast = undef,
+  $gateway = undef,
+  $pointopoint = undef,
+  $mtu = undef,
+  $scope = undef,
+
+  # up and down commands
+  $pre_ups = [],
+  $ups = [],
+  $downs = [],
+  $post_downs = [],
+
+  # auxiliary options
+  $aux_ops = {},
+
+  # feature-helpers
+  $tx_queue = undef,
+  $routes = {},
+  $dns_nameservers = undef,
+  $dns_search = undef,
+) {
+  include debnet
+
+  validate_string($ifname)
+  validate_bool($auto)
+  validate_array($allows)
+  validate_re($family, '^inet$' )
+  validate_re($method, '^loopback$|^dhcp$|^static$|^manual$|^wvdial$|^disable$')
+  validate_hash($aux_ops)
+  validate_array($pre_ups)
+  validate_array($ups)
+  validate_array($downs)
+  validate_array($post_downs)
+  if $tx_queue {
+    if is_string($tx_queue) {
+      validate_re($tx_queue, '^\d+$')
+    }
+    else {
+      validate_re($tx_queue, '^\d+$')
+    }
+  }
+  if $routes {
+    validate_hash($routes)
+  }
+  if $dns_nameservers {
+    validate_array($dns_nameservers)
+  }
+  if $dns_search {
+    validate_array($dns_search)
+  }
+
+  if $hwaddress {
+    $cfg_hwaddress = $hwaddress
+  }
+  else {
+    if $ifname == 'mgmt' {
+      # Read hwaddr from platinfo.json
+      $jsondata = parsejson(file("/etc/platinfo.json"))
+      if $jsondata {
+        $cfg_hwaddress = $jsondata['MgmtMac']
+      }
+      else { $cfg_hwaddress = undef }
+    }
+    else { $cfg_hwaddress = undef }
+  }
+
+  if $iface_d {
+    if $lsbdistid == 'Debian' and
+      $lsbmajdistrelease =~ /!^8.*/ {
+      fail('This feature is not available prior to Debian release 8.')
+    }
+    validate_re($iface_d, '^[a-zA-Z][a-zA-Z0-9_]*$')
+    $cfgtgt = "${debnet::params::interfaces_dir}/${iface_d}"
+  } else {
+    $cfgtgt = $debnet::params::interfaces_file
+  }
+  validate_absolute_path($cfgtgt)
+
+  # Further validations by method
+  case $method {
+    'dhcp' : {
+      if !defined(Package[$debnet::params::dhclient_pkg]) {
+        package { $debnet::params::dhclient_pkg: ensure => 'installed', }
+      }
+      if $hostname { validate_re($hostname,
+        '^(?![0-9]+$)(?!-)[a-zA-Z0-9-]{,63}(?<!-)$') }
+      if $metric { validate_re($metric, '^\d+$') }
+      if $leasetime { validate_re($leasetime, '^\d+$') }
+      if $vendor { validate_string($vendor) }
+      if $client { validate_string($client) }
+      if $cfg_hwaddress {
+        validate_re($cfg_hwaddress, '^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$')
+      }
+    }
+
+    'static' : {
+      validate_re($address, '^(:?[0-9]{1,3}\.){3}[0-9]{1,3}$')
+      if is_string($netmask) {
+        validate_re($netmask, '^([0-9]{1,3}\.){3}[0-9]{1,3}$|^[0-9]{1,2}$')
+      }
+      else {
+        validate_re($netmask, '^\d+$')
+      }
+      if $broadcast {
+        validate_re($broadcast, '^([0-9]{1,3}\.){3}[0-9]{1,3}$|^[+-]$')
+      }
+      if $metric { validate_re($metric, '^\d+$') }
+      if $gateway { validate_re($gateway, '(:?[0-9]{1,3}\.){3}[0-9]{1,3}$') }
+      if $pointopoint {
+        validate_re($pointopoint, '(:?[0-9]{1,3}\.){3}[0-9]{1,3}$')
+      }
+      if $cfg_hwaddress {
+        validate_re($cfg_hwaddress, '^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$')
+      }
+      if $mtu { validate_re($mtu, '^\d+$') }
+      if $scope { validate_re($scope, '^global$|^link$|^host$') }
+    }
+
+    'wvdial' : {
+      if !defined(Package[$debnet::params::wvdial_pkg]) {
+        package { $debnet::params::wvdial_pkg: ensure => 'installed', }
+      }
+    }
+  }
+
+  # Gen to temp file
+  $tmpgen = "/tmp/debnet_${ifname}.tmp"
+  if !defined(Concat[$tmpgen])
+  {
+    concat { $tmpgen:
+      owner          => 'root',
+      group          => 'root',
+      mode           => '0644',
+      ensure_newline => true,
+      order          => 'numeric',
+    }
+
+    concat::fragment { "${tmpgen}_header":
+      target  => $tmpgen,
+      content => template('debnet/header.erb'),
+      order   => 10,
+    }
+  }
+
+  case $method {
+    'disable' : {
+      concat::fragment { 'disable_stanza':
+        target  => $tmpgen,
+        content => template(
+          'debnet/iface_header.erb',
+          'debnet/iface_disable.erb'),
+        order   => 20 + $order,
+      }
+    }
+
+    'loopback' : {
+      concat::fragment { 'lo_stanza':
+        target  => $tmpgen,
+        content => template('debnet/loopback.erb'),
+        order   => 20 + $order,
+      }
+    }
+
+    'dhcp' : {
+      concat::fragment { "${ifname}_stanza":
+        target  => $tmpgen,
+        content => template(
+          'debnet/iface_header.erb',
+          'debnet/inet_dhcp.erb',
+          'debnet/iface_aux.erb',
+          'debnet/iface_routes.erb'),
+        order   => 30 + $order,
+      }
+    }
+
+    'static' : {
+      concat::fragment { "${ifname}_stanza":
+        target  => $tmpgen,
+        content => template(
+          'debnet/iface_header.erb',
+          'debnet/inet_static.erb',
+          'debnet/iface_aux.erb',
+          'debnet/iface_routes.erb'),
+        order   => 40 + $order,
+      }
+    }
+
+    'manual' : {
+      concat::fragment { "${ifname}_stanza":
+        target  => $tmpgen,
+        content => template(
+          'debnet/iface_header.erb',
+          'debnet/inet_misc.erb',
+          'debnet/iface_aux.erb'),
+        order   => 50 + $order,
+      }
+    }
+
+    'wvdial' : {
+      concat::fragment { "${ifname}_stanza":
+        target  => $tmpgen,
+        content => template(
+          'debnet/iface_header.erb',
+          'debnet/inet_misc.erb',
+          'debnet/iface_aux.erb',
+          'debnet/iface_routes.erb'),
+        order   => 60 + $order,
+      }
+    }
+
+    default: {
+      err('unrecognized method')
+    }
+  }
+
+  exec { "${ifname}-engage":
+    unless => "/usr/bin/cmp -s ${tmpgen} ${cfgtgt}",
+    command => "/sbin/ifdown ${ifname}; /bin/cp ${tmpgen} ${cfgtgt}",
+    require => Concat[$tmpgen],
+  } -> exec { "${ifname}-up":
+    unless => "/usr/bin/test ${method} = disable",
+    command => "/sbin/ifup ${ifname}",
+  }
+}
+

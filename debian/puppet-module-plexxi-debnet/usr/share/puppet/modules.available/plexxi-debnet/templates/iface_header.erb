@@ -1,0 +1,7 @@
+# interface <%= @ifname -%> configuration
+<% if @auto == true -%>
+auto <%= @ifname %>
+<% end -%>
+<% @allows.each do |s| -%>
+allow-<%= s -%> <%= @ifname %>
+<% end -%>

@@ -1,0 +1,17 @@
+Package: puppet-module-plexxi-debnet
+Version: 2.0.1
+Architecture: all
+Maintainer: Joe Lorenz <joe.lorenz@plexxi.com>
+Installed-Size: 121
+Depends: puppet-common (>= 3), puppet-common (<< 5), puppet-module-puppetlabs-stdlib (>= 4.3.2), puppet-module-puppetlabs-stdlib (<< 5), puppet-module-puppetlabs-concat (>= 1.1.1), puppet-module-puppetlabs-concat (<< 3)
+Section: admin
+Priority: optional
+Homepage: https://github.com/Plexxi/plexxi-debnet
+Description: Puppet module for network interface config
+ Puppet lets you centrally manage every important aspect of your system
+ using a cross-platform specification language that manages all the
+ separate elements normally aggregated in different files, like users,
+ cron jobs, and hosts, along with obviously discrete elements like
+ packages, services, and files.
+ .
+ The debnet module manages the network interface settings.

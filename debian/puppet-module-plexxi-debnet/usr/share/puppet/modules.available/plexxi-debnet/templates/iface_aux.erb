@@ -1,0 +1,24 @@
+<% @aux_ops.keys.sort.each do |k| -%>
+  <%= k -%> <%= @aux_ops[k] %>
+<% end -%>
+<% @pre_ups.each do |pu| -%>
+  pre-up <%= pu %>
+<% end -%>
+<% if @tx_queue -%>
+  up ip link set <%= @ifname -%> txqueuelen <%= @tx_queue %>
+<% end -%>
+<% @ups.each do |u| -%>
+  up <%= u %>
+<% end -%>
+<% @downs.each do |d| -%>
+  down <%= d %>
+<% end -%>
+<% @post_downs.each do |pd| -%>
+  post-down <%= pd %>
+<% end -%>
+<% if @dns_nameservers -%>
+  dns-nameservers <% @dns_nameservers.each do |ns| -%><%= ns -%> <% end %>
+<% end -%>
+<% if @dns_search -%>
+  dns-search <% @dns_search.each do |search| -%><%= search -%> <% end %>
+<% end -%>

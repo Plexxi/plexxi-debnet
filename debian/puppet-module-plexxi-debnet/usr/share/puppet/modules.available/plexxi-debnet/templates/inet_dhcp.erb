@@ -1,0 +1,19 @@
+iface <%= @ifname -%> <%= @family -%> dhcp
+<% if @hostname -%>
+  hostname <%= @hostname %>s
+<% end -%>
+<% if @metric -%>
+  metric <%= @metric -%>
+<% end -%>
+<% if @leasetime -%>
+  leasetime <%= @leasetime -%>
+<% end -%>
+<% if @vendor -%>
+  vendor "<%= @vendor -%>"
+<% end -%>
+<% if @client -%>
+  client "<%= @client -%>"
+<% end -%>
+<% if @cfg_hwaddress -%>
+  hwaddress <%= @cfg_hwaddress -%>
+<% end -%>
