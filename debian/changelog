@@ -1,4 +1,10 @@
-puppet-module-plexxi-debnet (2.0.1) UNRELEASED; urgency=medium
+puppet-module-plexxi-debnet (2.0.2) stable; urgency=medium
+
+  * Adjust for changes related to ifplugd and ifupdown
+
+ -- Joe Lorenz <joe.lorenz@plexxi.com>  Fri, 06 Jan 2017 08:32:39 -0500
+
+puppet-module-plexxi-debnet (2.0.1) stable; urgency=medium
 
   * Initial packaging for Plexxi with new modifications:
       - introduce 'disable' method and subclass

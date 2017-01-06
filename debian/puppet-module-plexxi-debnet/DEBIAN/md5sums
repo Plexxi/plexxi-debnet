@@ -1,11 +1,11 @@
 165993ee2c3461beff960a59b90fb883  usr/share/doc/puppet-module-plexxi-debnet/README.Debian
 38602f5619f1bb850774c20178809837  usr/share/doc/puppet-module-plexxi-debnet/README.md.gz
-4202c9019570d3e9aeeff23cc3d01b7e  usr/share/doc/puppet-module-plexxi-debnet/changelog.gz
+45599c17f6fe191e912b7297c073b3c6  usr/share/doc/puppet-module-plexxi-debnet/changelog.gz
 4c43d4cab4a759ea7f49671e1d5f6860  usr/share/doc/puppet-module-plexxi-debnet/copyright
 c5bf65ccd924bf4c309a079dee6dd550  usr/share/puppet/modules.available/plexxi-debnet/manifests/iface.pp
 b112faea9b213e4b808e7c287392c218  usr/share/puppet/modules.available/plexxi-debnet/manifests/iface/bond.pp
 9c95d5a6c52e7b28cde0871f7b80d442  usr/share/puppet/modules.available/plexxi-debnet/manifests/iface/bridge.pp
-7d97f5a23bc0feafd6af21f1a79dd9fe  usr/share/puppet/modules.available/plexxi-debnet/manifests/iface/dhcp.pp
+439eb8fb0522f8841e49ad8fae6827c0  usr/share/puppet/modules.available/plexxi-debnet/manifests/iface/dhcp.pp
 c3a36ef7b03767e186d6cbf7267805a4  usr/share/puppet/modules.available/plexxi-debnet/manifests/iface/disable.pp
 dfe3f9070bd737ae5219416368d87b75  usr/share/puppet/modules.available/plexxi-debnet/manifests/iface/loopback.pp
 1fdf576d982b7d32d5eb3ef2699f6d71  usr/share/puppet/modules.available/plexxi-debnet/manifests/iface/static.pp
